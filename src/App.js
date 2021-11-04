@@ -1,25 +1,44 @@
-import logo from './logo.svg';
+import React, { Component } from 'react';
 import './App.css';
+import Home from './components/Home/Home';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export default class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      loading: true,
+      pokemons: [],
+    };
+
+    this.doRequisition = this.doRequisition.bind(this);
+    this.getPokemons = this.getPokemons.bind(this);
+  }
+
+  async componentDidMount() {
+    await this.getPokemons();
+  }
+
+  async getPokemons() {
+    const { pokemons } = this.state;
+    const pokemonsData = await this.doRequisition();
+    pokemonsData.results.forEach(async (poke) => {
+      const fetchGrab = await fetch(poke.url);
+      const fetchConversion = await fetchGrab.json();
+      pokemons.push(fetchConversion);
+    });
+    this.setState({ loading: false });
+  }
+
+  async doRequisition() {
+    const api = await fetch('https://pokeapi.co/api/v2/pokemon?limit=100%22');
+    const conversion = api.json();
+    return conversion;
+  }
+
+  render() {
+    const { pokemons, loading } = this.state;
+    return (
+      <Home loading={ loading } pokemons={ pokemons } />
+    );
+  }
 }
-
-export default App;
